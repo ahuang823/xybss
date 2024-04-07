@@ -8,7 +8,7 @@
       <!--      </el-select>-->
 
       <el-input v-model="listQuery.projectName" placeholder="项目名称" style="width: 200px" class="filter-item" />
-      <el-input v-model="listQuery.shopId" placeholder="厅店" style="width: 200px;margin-left: 1%" class="filter-item" />
+      <el-input v-model="listQuery.shopMerchantId" placeholder="厅店" style="width: 200px;margin-left: 1%" class="filter-item" />
 
       <el-date-picker
         v-model="listQuery.accountPeriod"
@@ -71,21 +71,22 @@
           {{ scope.row.accountPeriod }}
         </template>
       </el-table-column>
-      <el-table-column label="项目名称" align="center">
+      <el-table-column label="项目名称" align="center" min-width="150px">
+
         <template v-slot="scope">
           {{ scope.row.projectName }}
         </template>
       </el-table-column>
 
-      <el-table-column label="项目总金额" align="center" sortable>
-        <template v-slot="scope">
-          {{ scope.row.projectAmount }}
-        </template>
-      </el-table-column>
+      <!--      <el-table-column label="项目总金额" align="center" sortable>-->
+      <!--        <template v-slot="scope">-->
+      <!--          {{ scope.row.projectAmount }}-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
 
-      <el-table-column label="发起时间" sortable>
+      <el-table-column label="发起时间" align="center" sortable>
         <template v-slot="scope">
-          {{ scope.row.initiating_time }}
+          {{ scope.row.occurrenceTime }}
         </template>
       </el-table-column>
 
@@ -95,15 +96,15 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="厅店" align="center" sortable>
+      <el-table-column label="厅店" align="center" sortable min-width="175px">
         <template v-slot="scope">
-          {{ scope.row.org_name }}
+          {{ scope.row.merchantName }}
         </template>
       </el-table-column>
 
       <el-table-column label="厅店ID" align="center" sortable>
         <template v-slot="scope">
-          {{ scope.row.shopId }}
+          {{ scope.row.shopMerchantId }}
         </template>
       </el-table-column>
 
@@ -143,11 +144,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="片区" align="center">
-        <template v-slot="scope">
-          {{ scope.row.unit_name3 }}
-        </template>
-      </el-table-column>
+      <!--      <el-table-column label="片区" align="center">-->
+      <!--        <template v-slot="scope">-->
+      <!--          {{ scope.row.unit_name3 }}-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
 
     </el-table>
 
@@ -166,7 +167,6 @@
 </template>
 
 <script>
-import { getList3 } from '@/api/remuneration'
 import { getDetailsList } from '@/api/remuneration'
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination'
@@ -196,7 +196,7 @@ export default {
         pageSize: 10,
         projectName: undefined,
         accountPeriod: undefined,
-        shopId: undefined,
+        merchantName: undefined,
         county: undefined,
         businessDepartment: undefined
         // shopId: '979070906'
@@ -212,21 +212,12 @@ export default {
 
     }
   },
+
   created() {
     this.fetchData()
   },
 
   methods: {
-    getList() {
-      this.listLoading = true
-      getList3(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.listLoading = false
-
-        console.log(this.list)
-      })
-    },
-
     fetchData() {
       this.listLoading = true
       getDetailsList(this.listQuery).then(response => {

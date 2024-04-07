@@ -10,7 +10,7 @@
 
       <el-col :span="8">
         <el-form-item label="申请人工号">
-          <el-input v-model="form.staff_code" :disabled="true" />
+          <el-input v-model="form.usercode" :disabled="true" />
         </el-form-item>
       </el-col>
 
@@ -63,11 +63,27 @@
         </el-radio-group>
       </el-form-item>
 
-      <el-col :span="8">
-        <el-form-item label="审批人">
-          <el-input v-model="form.name" :disabled="true" />
-        </el-form-item>
-      </el-col>
+      <el-row>
+        <el-col :span="16">
+          <el-form-item label="审批人">
+            <el-select v-model="form.realName" filterable clearable placeholder="请选择" @change="changeAuditor">
+              <el-option
+                v-for="(item,index) in auditorList"
+                :key="index"
+                :label="item.realName"
+                :value="index"
+              >
+                <span style="float: left">{{ item.realName }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.orgName }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+
+        <!--        <el-form-item label="审批人">-->
+        <!--          <el-input v-model="form.name" :disabled="true" />-->
+        <!--        </el-form-item>-->
+      </el-row>
 
       <el-row />
 
@@ -94,7 +110,8 @@
 
 <script>
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
-import { addDetailsList } from '@/api/remuneration'
+import { addDetailsList, getAuditorInfos } from '@/api/remuneration'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'UploadExcel',
@@ -102,18 +119,20 @@ export default {
   data() {
     return {
       form: {
-        createUser: '黄鑫乘',
+        createUser: '',
         createDate: '',
-        staff_code: 'hxc117263',
-        unit_name: '信产',
+        usercode: '',
+        unit_name: '',
         flowName: '',
         flowCode: '',
         flowNotes: [],
-        phone: '18079008981',
+        phone: '',
         resource: '部门领导审批',
         businessType: '',
         // commissionInfos: [],
-        flowTemplateId: '1'
+        flowTemplateId: '1',
+        auditUser: '',
+        orgId: ''
       },
 
       rules: {
@@ -123,24 +142,63 @@ export default {
       },
 
       tableData: [],
-      tableHeader: []
+      tableHeader: [],
+
+      auditorQuery: {
+        orgId: '',
+        auditTier: 'department'
+      },
+      auditorList: []
+      // userInfo: store.getters.state
     }
   },
+  computed: {
+    ...mapGetters([
+      'userinfo'
+    ])
+  },
   mounted() {
+    console.log(this.userinfo)
+
     this.set_data()
   },
 
   methods: {
+    changeAuditor(index) {
+      console.log('changeAuditor')
+      console.log(index)
+      console.log(this.auditorList[index])
+      this.form.orgId = this.auditorList[index].orgId
+      this.form.auditUser = this.auditorList[index].userId
+
+      console.log(this.form)
+    },
+
     set_data() {
       /* 发起时间和工单号初始化，获取当前时间转换为对应格式 */
+      this.listLoading = true
       const moment = require('moment')
       const datetime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
       const datestring = moment(new Date()).format('YYYYMMDDHHmmssSSSS')
-      // const datestring2 = moment(new Date()).format('YYYYMMDDHHmmssSSSS')
+
       this.form.createDate = datetime
       this.form.flowCode = datestring
+      this.form.createUser = this.userinfo.userId
+      this.form.usercode = this.userinfo.userCode
+      this.form.phone = this.userinfo.phone
+      this.form.unit_name = this.userinfo.userAuthorities[0].orgInfo.orgName
+      this.listLoading = false
 
-      console.log('set_data', this)
+      /* 获取审批人信息*/
+      getAuditorInfos(this.auditorQuery).then(response => {
+        console.log('getAuditorInfos', response)
+
+        if (response.code === 200) {
+          this.auditorList = response.data
+          console.log('auditorList', this.auditorList)
+          this.listLoading = false
+        }
+      })
     },
 
     onSubmit(formName) {
@@ -165,17 +223,18 @@ export default {
       this.listLoading = true
       this.form.commissionInfos = this.tableData
       console.log('this.from', this.form)
-      // console.log('this.commissionInfos', this.form.commissionInfos)
-      // const tt = JSON.stringify(this.from)
-      // console.log(tt)
-      // console.log(this.form)
 
       addDetailsList(this.form).then(response => {
         console.log('response', response)
 
         if (response.code === 200) {
+          this.$message(response.msg)
           this.listLoading = false
-          alert('提交成功!')
+
+          // this.$message({
+          //   message: response.msg,
+          //   type: 'warning'
+          // })
         }
 
         // this.list = response.data.records
@@ -221,10 +280,12 @@ export default {
       // console.log(uniqueArr)
       // console.log(uniqueArr.indexOf('202309月夏季营销激励倒跑追溯'))
       //
-      // this.tableData.forEach((item) => {
-      //   item.projectAmount = sum
-      //   item.commissionCode = this.form.it_code + '0' + (uniqueArr.indexOf(item.projectName) + 1)
-      // })
+      this.tableData.forEach((item) => {
+        // item.projectAmount = sum
+        // item.commissionCode = this.form.it_code + '0' + (uniqueArr.indexOf(item.projectName) + 1)
+        item.commissionCode = this.form.flowCode
+        item.commissionType = this.form.businessType
+      })
 
     //   待处理，获取登录信息更新发起人，发起部门等信息
     }

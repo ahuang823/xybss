@@ -62,7 +62,21 @@ export default {
     clipboardDemo: 'Clipboard',
     i18n: '国际化',
     externalLink: '外链',
-    profile: '个人中心'
+    profile: '个人中心',
+    remunerationManage: '佣金管理',
+    remunerationInquire: '佣金查询',
+    remuneration_approve: '佣金审批',
+    remuneration_details: '佣金详情',
+    issue_details: '核发详情',
+    remuneration_append: '佣金申请',
+    remuneration_issue: '佣金核发',
+    issue_list: '核发库',
+    issue_export: '核发导出',
+    flow_inquire: '工单查询',
+    flow_details: '工单详情',
+    remuneration_issued: '已核发',
+    remuneration_issuing: '待核发'
+
   },
   navbar: {
     dashboard: '首页',
@@ -145,7 +159,7 @@ export default {
   excel: {
     export: '导出',
     selectedExport: '导出已选择项',
-    placeholder: '请输入文件名(默认excel-list)'
+    placeholder: '请输入文件名'
   },
   zip: {
     export: '导出',

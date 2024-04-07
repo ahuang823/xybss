@@ -12,51 +12,51 @@
       stripe
     >
 
-      <el-table-column align="center" label="序号" width="95" prop="id" sortable>
-        <template v-slot="scope">
-          {{ scope.row.id }}
-        </template>
-      </el-table-column>
-
       <el-table-column align="center" label="账期" prop="month_id" sortable="true">
         <template v-slot="scope">
-          {{ scope.row.month_id }}
+          {{ scope.row.accountPeriod }}
         </template>
       </el-table-column>
-      <el-table-column label="项目名称" align="center">
+      <el-table-column label="项目名称" align="center" min-width="150px">
         <template v-slot="scope">
-          {{ scope.row.project_name }}
-        </template>
-      </el-table-column>
-
-      <el-table-column align="center" label="项目总金额">
-        <template v-slot="scope">
-          {{ scope.row.total_charge }}
+          {{ scope.row.projectName }}
         </template>
       </el-table-column>
 
-      <el-table-column label="发起时间" align="center" sortable>
+      <el-table-column label="发生时间" align="center" sortable>
         <template v-slot="scope">
-          {{ scope.row.initiating_time }}
+          {{ scope.row.occurrenceTime }}
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="发起部门">
         <template v-slot="scope">
-          {{ scope.row.initiating_deparement }}
+          {{ scope.row.agentDepartment }}
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="经办人">
         <template v-slot="scope">
-          {{ scope.row.agent_name }}
+          {{ scope.row.agent }}
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="厅店" min-width="175px">
+        <template v-slot="scope">
+          {{ scope.row.merchantName }}
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="金额">
+        <template v-slot="scope">
+          {{ scope.row.amount }}
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="操作">
         <template v-slot="scope">
           <!--          <el-button size="small" @click="goIssue(scope.row)">明细</el-button>-->
-          <el-button size="small" type="primary" @click="addSingle(scope.row)">删除</el-button>
+          <el-button size="small" type="primary" @click="delSingle(scope.row)">删除</el-button>
         </template>
 
       </el-table-column>
@@ -65,9 +65,9 @@
 
     <div class="app-footer">
 
-      <el-col style="margin-left: 1%;margin-bottom: 1%" :span="2"><el-tag size="large">当前选择总金额：{{ Amount }}</el-tag></el-col>
-      <el-col style="margin-left: 2%;margin-bottom: 1%" :span="2">
-        <el-button type="primary" size="small" @click="onSubmit">核发</el-button>
+      <el-col style="margin-left: 1%;margin-top: 10px" :span="2"><el-tag size="large">当前选择总金额：{{ Amount }}</el-tag></el-col>
+      <el-col style="margin-left: 2%;margin-top: 10px" :span="2">
+        <el-button type="primary" size="small" @click="postIssue">核发</el-button>
       </el-col>
 
     </div>
@@ -77,8 +77,8 @@
 </template>
 
 <script>
-import { getCommissionIssueInfos } from '@/api/remuneration'
 import Vue from 'vue'
+import { addIssueInfo } from '@/api/remuneration'
 
 export default {
   filters: {
@@ -97,7 +97,6 @@ export default {
       listLoading: true,
       multipleSelection: [],
       drawer: false,
-
       direction: 'rtl'
     }
   },
@@ -106,8 +105,8 @@ export default {
     // 计算当前选择总金额
     Amount() {
       let sum = 0
-      this.multipleSelection.forEach((item) => {
-        sum += item.total_charge
+      this.list.forEach((item) => {
+        sum += parseFloat(item.amount)
       })
       return sum
     }
@@ -121,34 +120,52 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      getCommissionIssueInfos(Vue.prototype.$globalArray).then(response => {
-        this.list = response.data
-        this.listLoading = false
-        console.log(this.list)
+      this.list = Vue.prototype.$globalAllList
+      Object.freeze(this.list)
+
+      console.log(this.list)
+
+      // getCommissionIssueInfos(Vue.prototype.$globalArray).then(response => {
+      //   this.list = response.data
+      //   this.listLoading = false
+      //   console.log(this.list)
+      // })
+    },
+    postIssue() {
+      console.log('提交更新')
+      this.listLoading = true
+      const issueList = []
+      const moment = require('moment')
+      const dateString = moment(new Date()).format('YYYYMMDD')
+      const accountperiod = moment(new Date()).format('YYYYMM')
+
+      this.list.forEach((item) => {
+        issueList.push({
+          flowId: item.flowId,
+          commissionId: item.commissionId,
+          issueAmount: item.amount,
+          isIssued: '1',
+          issueBatch: dateString,
+          accountPeriod: accountperiod
+        })
       })
-    },
-    goIssue(row) {
-      console.log('审批')
-      // console.log(row)
-      // this.$router.push({ path: 'example/remuneration_details', query: { id: '388' }})
-      this.$router.push({ path: `issue_details/${row.id}`, query: { row }})
-      console.log(this.$router)
-    },
-    addSingle() {
-      console.log('批量加入核发库')
 
-      // console.log('row', row.id)
-
-      // if (!Vue.prototype.$globalArray.includes(row.id)) {
-      //   Vue.prototype.$globalArray.push(row.id)
-      //   console.log('Vue.prototype.$globalArray', Vue.prototype.$globalArray)
-      // }
-    },
-
-    // 调整选择明细
-    handleSelectionChange(val) {
-      this.multipleSelection = val
-      console.log('this.multipleSelection', this.multipleSelection)
+      console.log(issueList)
+      addIssueInfo(issueList).then(response => {
+        console.log(response)
+        if (response.code === 200) {
+          this.$message({
+            message: response.msg,
+            type: 'success'
+          })
+        } else {
+          this.$message({
+            message: response.msg,
+            type: 'warning'
+          })
+        }
+      })
+      this.listLoading = false
     }
 
   }

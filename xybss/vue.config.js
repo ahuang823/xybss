@@ -24,28 +24,45 @@ module.exports = {
    * In most cases please use '/' !!!
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
-  publicPath: '/',
+  publicPath: './',
   outputDir: 'dist',
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
-  productionSourceMap: false,
+  productionSourceMap: true,
   devServer: {
+    host: '0.0.0.0',
     port: port,
     open: true,
     overlay: {
       warnings: false,
       errors: true
     },
+
+    // proxy: {
+    //   '[process.env.VUE_APP_BASE_API]': {
+    //     // 后端地址
+    //     target: 'http://10.220.30.133:8080',
+    //     // 允许跨域
+    //     changeOrigin: true
+    //     // 路径重写:我们可以应/api，替代上述后端url
+    //     // pathRewrite: {
+    //     //   ['^' + process.env.VUE_APP_BASE_API]: ''
+    //     // }
+    //   }
     proxy: {
-      '[process.env.VUE_APP_BASE_API]': {
+      '/': {
         // 后端地址
         target: 'http://10.220.30.133:8080',
+        // target: 'http://134.253.29.161:8080',
         // 允许跨域
-        changeOrigin: true
+        changeOrigin: true,
         // 路径重写:我们可以应/api，替代上述后端url
-        // pathRewrite: {
-        //   ['^' + process.env.VUE_APP_BASE_API]: ''
-        // }
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': '*',
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Credentials': 'true'
+        }
       }
     }
 

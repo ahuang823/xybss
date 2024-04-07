@@ -94,11 +94,11 @@ export function getRelatedFlowInfos(params) {
 }
 
 // 佣金核发：佣金工单
-export function getIssueInfo(params) {
+export function getIssueInfo(data) {
   return request({
     url: `/commissionIssue/getPageCommissionIssueInfos`,
     method: 'post',
-    params
+    data
   })
 }
 // 佣金核发：加入核发库
@@ -107,5 +107,31 @@ export function addIssueInfo(data) {
     url: `/commissionIssue/addCommissionIssueInfos`,
     method: 'post',
     data
+  })
+}
+
+// 获取审批人列表
+export function getAuditorInfos(params) {
+  return request({
+    url: `/flow/getAuditorInfos`,
+    method: 'get',
+    params
+  })
+}
+
+// 按批次汇总核发信息
+export function getIssueByPeriod(params) {
+  return request({
+    url: `/commissionIssue/getCommissionIssueInfosByPeriod`,
+    method: 'get',
+    params
+  })
+}
+
+export function getFlowStepInfo(params) {
+  return request({
+    url: `/flow/getFlowInfoDetails`,
+    method: 'get',
+    params
   })
 }

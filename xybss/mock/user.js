@@ -26,7 +26,7 @@ const users = {
 module.exports = [
   // user login
   {
-    url: '/vue-element-admin/user/login',
+    url: '/sysLogin',
     type: 'post',
     response: config => {
       const { username } = config.body
@@ -41,7 +41,7 @@ module.exports = [
       }
 
       return {
-        code: 20000,
+        code: 200,
         data: token
       }
     }
@@ -56,15 +56,15 @@ module.exports = [
       const info = users[token]
 
       // mock error
-      if (!info) {
-        return {
-          code: 50008,
-          message: 'Login failed, unable to get user approve_details.'
-        }
-      }
+      // if (!info) {
+      //   return {
+      //     code: 50008,
+      //     message: 'Login failed, unable to get user approve_details.1'
+      //   }
+      // }
 
       return {
-        code: 20000,
+        code: 200,
         data: info
       }
     }

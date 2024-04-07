@@ -50,10 +50,18 @@
         </template>
       </el-table-column>
 
+      <el-table-column label="流转状态" align="center">
+        <template slot-scope="{row}">
+          <el-tag :type="row.flowStatus | statusFilter">
+            {{ row.flowStatus| typeFilter }}
+          </el-tag>
+        </template>
+      </el-table-column>
+
       <el-table-column align="center" label="操作">
         <template v-slot="scope">
-          <el-button size="small" @click="goApprove(scope.row)">审批</el-button>
-          <!--          <el-button size="small" @click="goApprove(scope.row)">查看详情</el-button>-->
+          <el-button size="small" @click="goApprove(scope.row)">查看详情</el-button>
+
         </template>
       </el-table-column>
 
@@ -67,14 +75,23 @@ import { mapGetters } from 'vuex'
 
 export default {
   filters: {
-    // statusFilter(status) {
-    //   const statusMap = {
-    //     published: 'success',
-    //     draft: 'gray',
-    //     deleted: 'danger'
-    //   }
-    //   return statusMap[status]
-    // }
+    statusFilter(status) {
+      const statusMap = {
+        'end': 'success',
+        '1': 'gray',
+        '2': 'danger'
+      }
+      return statusMap[status]
+    },
+    typeFilter(type) {
+      const typeMap = {
+        'end': '已完成',
+        '1': '处理中',
+        '2': '已终止'
+      }
+      return typeMap[type]
+    }
+
   },
   data() {
     return {
@@ -110,7 +127,7 @@ export default {
       console.log('审批')
       // console.log(row)
       // this.$router.push({ path: 'example/remuneration_details', query: { id: '388' }})
-      this.$router.push({ path: `remuneration_details/${row.flowId}`, query: { row }})
+      this.$router.push({ path: `flow_details/${row.flowId}`, query: { row }})
       console.log(this.$router)
     }
   }

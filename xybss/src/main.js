@@ -23,8 +23,11 @@ import * as filters from './filters' // global filters
 import fileDownload from './utils/download'
 Vue.prototype.$download = fileDownload
 
-// 佣金核发全局变量
-Vue.prototype.$globalArray = new Set()
+// 佣金全部核发全局变量
+Vue.prototype.$globalAllArray = new Set() // 用来存储全部核发清单的ID
+Vue.prototype.$globalAllList = [] // 用来存储全部核发的清单
+// 佣金部分核发全局变量
+Vue.prototype.$globalPartArray = new Set()
 
 /**
  * If you don't want to use mock-server
@@ -39,10 +42,10 @@ Vue.prototype.$globalArray = new Set()
 //   mockXHR()
 // }
 
-if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development') {
-  const { mockXHR } = require('../mock')
-  mockXHR()
-}
+// if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development') {
+//   const { mockXHR } = require('../mock')
+//   mockXHR()
+// }
 
 Vue.use(Element, {
   size: Cookies.get('size') || 'medium', // set element-ui default size

@@ -1,4 +1,5 @@
-import { login, logout, getInfo } from '@/api/user'
+// import { login, logout, getInfo } from '@/api/user'
+import { login, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -7,7 +8,8 @@ const state = {
   name: '',
   avatar: '',
   introduction: '',
-  roles: []
+  roles: [],
+  userinfo: {}
 }
 
 const mutations = {
@@ -25,6 +27,9 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_USERINFO: (state, userinfo) => {
+    state.userinfo = userinfo
   }
 }
 
@@ -34,7 +39,7 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
-        console.log('userjs.response', response)
+        // console.log('userjs.response', response)
         const { data } = response
         commit('SET_TOKEN', data.token)
         setToken(data.token)
@@ -47,27 +52,55 @@ const actions = {
 
   // get user info
   getInfo({ commit, state }) {
+    console.log('getInfo')
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        console.log('getInfo')
+      console.log('state.token', state.token)
+      const tokens = {}
+      tokens.token = getToken()
+      console.log('tokens', tokens)
+
+      getInfo(tokens).then(response => {
+      // getInfo(state.token).then(response => {
+
         const { data } = response
 
+        console.log('getInfo.response', response)
         if (!data) {
           reject('Verification failed, please Login again.')
         }
+        data.roles = ['admin']
 
-        const { roles, name, avatar, introduction } = data
-
+        const { roles, username, avatar, realName } = data
+        const userInfo = response.data
         // roles must be a non-empty array
+
         if (!roles || roles.length <= 0) {
+          console.log('getInfo: roles must be a non-null array!')
           reject('getInfo: roles must be a non-null array!')
         }
 
         commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
+        commit('SET_NAME', username)
         commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
+        commit('SET_INTRODUCTION', realName)
+        commit('SET_USERINFO', userInfo)
         resolve(data)
+        console.log(userInfo)
+        console.log(data)
+        console.log('resolve')
+
+        // const { roles, name, avatar, introduction } = data
+        // // roles must be a non-empty array
+        // if (!roles || roles.length <= 0) {
+        //   console.log('getInfo: roles must be a non-null array!')
+        //   reject('getInfo: roles must be a non-null array!')
+        // }
+        //
+        // commit('SET_ROLES', roles)
+        // commit('SET_NAME', name)
+        // commit('SET_AVATAR', avatar)
+        // commit('SET_INTRODUCTION', introduction)
+        // resolve(data)
       }).catch(error => {
         reject(error)
       })
@@ -77,20 +110,20 @@ const actions = {
   // user logout
   logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
-        commit('SET_TOKEN', '')
-        commit('SET_ROLES', [])
-        removeToken()
-        resetRouter()
+      // logout(state.token).then(() => {
+      commit('SET_TOKEN', '')
+      commit('SET_ROLES', [])
+      removeToken()
+      resetRouter()
 
-        // reset visited views and cached views
-        // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
-        dispatch('tagsView/delAllViews', null, { root: true })
+      // reset visited views and cached views
+      // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
+      dispatch('tagsView/delAllViews', null, { root: true })
 
-        resolve()
-      }).catch(error => {
-        reject(error)
-      })
+      resolve()
+      // }).catch(error => {
+      //   reject(error)
+      // })
     })
   },
 

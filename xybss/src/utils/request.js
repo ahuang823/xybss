@@ -7,21 +7,21 @@ import { getToken } from '@/utils/auth'
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  timeout: 60000 // request timeout
 })
 
 // request interceptor
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
-      console.log('store.getters.token', store.getters.token)
-      config.headers['X-Token'] = getToken()
+      // console.log('getToken()', getToken())
+      config.headers['Authorization'] = getToken()
     }
+    // console.log('config()', config)
     return config
   },
   error => {
@@ -80,11 +80,11 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log('requset.js//err:' + error) // for debug
     Message({
-      message: error.msg,
+      message: error,
       type: 'error',
-      duration: 5 * 1000
+      duration: 10 * 1000
     })
     return Promise.reject(error)
   }
